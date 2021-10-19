@@ -24,7 +24,7 @@ interface WorkItemContextInterface
     /**
      * @return int|string
      */
-    public function getWorkItemId();
+//    public function getWorkItemId();
 
     /**
      * @return ParticipantInterface
