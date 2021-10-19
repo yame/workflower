@@ -48,8 +48,8 @@ class Process
 
     /**
      * @param int|string|WorkflowContextInterface $workflowContext
-     * @param WorkflowRepositoryInterface         $workflowRepository
-     * @param OperationRunnerInterface            $operationRunner
+     * @param WorkflowRepositoryInterface $workflowRepository
+     * @param OperationRunnerInterface $operationRunner
      */
     public function __construct($workflowContext, WorkflowRepositoryInterface $workflowRepository, OperationRunnerInterface $operationRunner)
     {
@@ -94,8 +94,10 @@ class Process
         assert($workItemContext->getActivityId() !== null);
 
         $processInstance = $this->configureWorkflow($workItemContext->getProcessContext()->getProcessInstance());
+        /* @var $flowObject ActivityInterface */
         $flowObject = $processInstance->getFlowObject($workItemContext->getActivityId());
-        $processInstance->allocateWorkItem(/* @var $flowObject ActivityInterface */ $flowObject, $workItemContext->getParticipant());
+        $workItem = $flowObject->getWorkItems()->getAt(0);
+        $processInstance->allocateWorkItem($workItem, $workItemContext->getParticipant());
     }
 
     /**
@@ -108,8 +110,10 @@ class Process
         assert($workItemContext->getActivityId() !== null);
 
         $processInstance = $this->configureWorkflow($workItemContext->getProcessContext()->getProcessInstance());
+        /* @var $flowObject ActivityInterface */
         $flowObject = $processInstance->getFlowObject($workItemContext->getActivityId());
-        $processInstance->startWorkItem(/* @var $flowObject ActivityInterface */ $flowObject, $workItemContext->getParticipant());
+        $workItem = $flowObject->getWorkItems()->getAt(0);
+        $processInstance->startWorkItem($workItem, $workItemContext->getParticipant());
     }
 
     /**
@@ -123,8 +127,10 @@ class Process
 
         $processInstance = $this->configureWorkflow($workItemContext->getProcessContext()->getProcessInstance());
         $processInstance->setProcessData($workItemContext->getProcessContext()->getProcessData());
+        /* @var $flowObject ActivityInterface */
         $flowObject = $processInstance->getFlowObject($workItemContext->getActivityId());
-        $processInstance->completeWorkItem(/* @var $flowObject ActivityInterface */ $flowObject, $workItemContext->getParticipant());
+        $workItem = $flowObject->getWorkItems()->getAt(0);
+        $processInstance->completeWorkItem($workItem, $workItemContext->getParticipant());
     }
 
     /**
@@ -139,7 +145,8 @@ class Process
         assert($workItemContext->getActivityId() !== null);
         assert($workItemContext->getProcessContext()->getProcessInstance()->getFlowObject($workItemContext->getActivityId()) instanceof ActivityInterface);
 
-        $activity = $workItemContext->getProcessContext()->getProcessInstance()->getFlowObject($workItemContext->getActivityId()); /* @var $activity ActivityInterface */
+        $activity = $workItemContext->getProcessContext()->getProcessInstance()->getFlowObject($workItemContext->getActivityId());
+        /* @var $activity ActivityInterface */
         if ($activity->isAllocatable()) {
             $this->allocateWorkItem($workItemContext);
             $nextWorkItemContext = new WorkItemContext($workItemContext->getParticipant());
