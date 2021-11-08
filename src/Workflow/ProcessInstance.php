@@ -20,6 +20,7 @@ use PHPMentors\Workflower\Workflow\Activity\WorkItem;
 use PHPMentors\Workflower\Workflow\Activity\WorkItemInterface;
 use PHPMentors\Workflower\Workflow\Element\ConnectingObjectCollection;
 use PHPMentors\Workflower\Workflow\Element\ConnectingObjectInterface;
+use PHPMentors\Workflower\Workflow\Element\FlowObject;
 use PHPMentors\Workflower\Workflow\Element\FlowObjectCollection;
 use PHPMentors\Workflower\Workflow\Element\FlowObjectInterface;
 use PHPMentors\Workflower\Workflow\Element\Token;
@@ -148,7 +149,7 @@ class ProcessInstance implements ProcessInstanceInterface, \Serializable
 
     /**
      * @param int|string $id
-     * @param string     $name
+     * @param string $name
      */
     public function __construct($id, $name)
     {
@@ -175,10 +176,23 @@ class ProcessInstance implements ProcessInstanceInterface, \Serializable
             'connectingObjectCollection' => $this->connectingObjectCollection,
             'flowObjectCollection' => $this->flowObjectCollection,
             'roleCollection' => $this->roleCollection,
-            'startEvent' => $this->startEvent,
-            'endEvents' => $this->endEvents,
-            'tokens' => $this->tokens,
-            'activityLogCollection' => $this->activityLogCollection,
+            'startEvent' => $this->startEvent->getId(),
+            'endEvents' => collect($this->endEvents)->map(function (EndEvent $item) {
+                return $item->getId();
+            })->toArray(),
+            'tokens' => collect($this->tokens)->map(function (Token $token) {
+                return [
+                    'id' => $token->getId(),
+                    'currentFlowObject' => $token->getCurrentFlowObject()->getId(),
+                    'previousFlowObject' => $token->getPreviousFlowObject()->getId(),
+                ];
+            })->toArray(),
+            'activityLogCollection' => collect($this->activityLogCollection)->map(function (ActivityLog $log) {
+                return [
+                    'activity' => $log->getActivity()->getId(),
+                    'workItem' => $log->getWorkItem()->getId(),
+                ];
+            })->toArray(),
         ]);
     }
 
@@ -191,6 +205,39 @@ class ProcessInstance implements ProcessInstanceInterface, \Serializable
             if (property_exists($this, $name)) {
                 $this->$name = $value;
             }
+        }
+
+        $this->setFields();
+    }
+
+    /**
+     * @author yame
+     */
+    protected function setFields()
+    {
+        //设置角色
+        $roleCollection = new RoleCollection();
+        foreach ($this->roleCollection as $role) {
+            $roleCollection->add(new Role($role));
+        }
+        $this->roleCollection = $roleCollection;
+
+        $workItems = [];
+        foreach ($this->flowObjectCollection as $item) {
+            if (method_exists($item, 'getWorkItems')) {
+                foreach ($item->getWorkItems() as $workItem) {
+                    $workItem->setProcessInstance($this);
+                    $workItem->setActivity($item);
+
+                    $workItems[] = $workItem;
+                }
+            }
+
+            if ($role = $item->getRole()) {
+                $item->setRole($this->roleCollection->get($role));
+            }
+
+            $item->setProcessInstance($this);
         }
     }
 
@@ -428,7 +475,7 @@ class ProcessInstance implements ProcessInstanceInterface, \Serializable
     }
 
     /**
-     * @param WorkItemInterface    $workItem
+     * @param WorkItemInterface $workItem
      * @param ParticipantInterface $participant
      */
     public function allocateWorkItem(WorkItemInterface $workItem, ParticipantInterface $participant)
@@ -441,7 +488,7 @@ class ProcessInstance implements ProcessInstanceInterface, \Serializable
     }
 
     /**
-     * @param WorkItemInterface    $workItem
+     * @param WorkItemInterface $workItem
      * @param ParticipantInterface $participant
      */
     public function startWorkItem(WorkItemInterface $workItem, ParticipantInterface $participant)
@@ -454,7 +501,7 @@ class ProcessInstance implements ProcessInstanceInterface, \Serializable
     }
 
     /**
-     * @param WorkItemInterface    $workItem
+     * @param WorkItemInterface $workItem
      * @param ParticipantInterface $participant
      */
     public function completeWorkItem(WorkItemInterface $workItem, ParticipantInterface $participant)
@@ -615,7 +662,7 @@ class ProcessInstance implements ProcessInstanceInterface, \Serializable
     }
 
     /**
-     * @param ActivityInterface    $activity
+     * @param ActivityInterface $activity
      * @param ParticipantInterface $participant
      *
      * @throws AccessDeniedException
@@ -707,7 +754,7 @@ class ProcessInstance implements ProcessInstanceInterface, \Serializable
 
     /**
      * @param FlowObjectInterface $flowObject
-     * @param Token               $token
+     * @param Token $token
      *
      * @since Method available since Release 2.0.0
      */

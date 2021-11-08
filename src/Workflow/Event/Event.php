@@ -55,7 +55,7 @@ abstract class Event extends FlowObject implements EventInterface
             get_parent_class($this) => parent::serialize(),
             'id' => $this->id,
             'name' => $this->name,
-            'role' => $this->role,
+            'role' => $this->role ? $this->role->getId() : null,
         ]);
     }
 
@@ -100,6 +100,11 @@ abstract class Event extends FlowObject implements EventInterface
     public function getRole()
     {
         return $this->role;
+    }
+
+    public function setRole($role)
+    {
+        return $this->role = $role;
     }
 
     /**

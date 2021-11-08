@@ -42,7 +42,7 @@ abstract class Gateway extends FlowObject implements GatewayInterface
             get_parent_class($this) => parent::serialize(),
             'id' => $this->id,
             'name' => $this->name,
-            'role' => $this->role,
+            'role' => $this->role ? $this->role->getId() : '',
         ]);
     }
 
@@ -79,6 +79,11 @@ abstract class Gateway extends FlowObject implements GatewayInterface
     public function getRole()
     {
         return $this->role;
+    }
+
+    public function setRole($role)
+    {
+        return $this->role = $role;
     }
 
     /**

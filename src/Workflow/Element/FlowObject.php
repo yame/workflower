@@ -34,14 +34,18 @@ abstract class FlowObject implements FlowObjectInterface, TransitionalInterface,
             }
         }
     }
-
+    
     /**
      * {@inheritdoc}
      */
     public function serialize()
     {
+        $token = collect($this->token)->map(function (Token $token){
+           return $token->getId();
+        })->toArray();
+
         return serialize([
-            'token' => $this->token,
+            'token' => $token,
             'started' => $this->started,
         ]);
     }

@@ -25,7 +25,9 @@ class RoleCollection implements \Countable, \IteratorAggregate, \Serializable
     public function serialize()
     {
         return serialize([
-            'roles' => $this->roles,
+            'roles' => array_map(function ($item){
+                return $item->toArray();
+            },$this->roles),
         ]);
     }
 

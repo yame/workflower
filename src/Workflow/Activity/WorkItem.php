@@ -81,8 +81,8 @@ class WorkItem implements WorkItemInterface, \Serializable
     {
         return serialize([
             'id' => $this->id,
-            'parentProcessInstance' => $this->parentProcessInstance,
-            'parentActivity' => $this->parentActivity,
+//            'parentProcessInstance' => $this->parentProcessInstance,
+//            'parentActivity' => $this->parentActivity,
             'state' => $this->state,
             'participant' => $this->participant === null ? null : ($this->participant instanceof LoggedParticipant ? $this->participant : new LoggedParticipant($this->participant)),
             'creationDate' => $this->creationDate,

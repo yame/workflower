@@ -44,6 +44,14 @@ class Role implements \Serializable
         ]);
     }
 
+    public function toArray()
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+        ];
+    }
+
     /**
      * {@inheritdoc}
      */

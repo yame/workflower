@@ -85,7 +85,7 @@ abstract class AbstractTask extends FlowObject implements ActivityInterface, \Se
         return serialize([
             get_parent_class($this) => parent::serialize(),
             'id' => $this->id,
-            'role' => $this->role,
+            'role' => $this->role ? $this->role->getId() : null,
             'name' => $this->name,
             'state' => $this->state,
             'defaultSequenceFlowId' => $this->defaultSequenceFlowId,
@@ -101,6 +101,7 @@ abstract class AbstractTask extends FlowObject implements ActivityInterface, \Se
      */
     public function unserialize($serialized)
     {
+//        dd($serialized);
         foreach (unserialize($serialized) as $name => $value) {
             if ($name == get_parent_class($this)) {
                 parent::unserialize($value);
@@ -162,6 +163,11 @@ abstract class AbstractTask extends FlowObject implements ActivityInterface, \Se
     public function getRole()
     {
         return $this->role;
+    }
+
+    public function setRole($role)
+    {
+        return $this->role = $role;
     }
 
     /**

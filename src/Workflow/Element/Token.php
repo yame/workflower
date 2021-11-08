@@ -12,7 +12,7 @@
 
 namespace PHPMentors\Workflower\Workflow\Element;
 
-class Token
+class Token 
 {
     /**
      * @var string
