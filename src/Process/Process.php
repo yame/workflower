@@ -17,6 +17,7 @@ use PHPMentors\Workflower\Workflow\Activity\UnexpectedActivityStateException;
 use PHPMentors\Workflower\Workflow\Event\StartEvent;
 use PHPMentors\Workflower\Workflow\Operation\OperationRunnerInterface;
 use PHPMentors\Workflower\Workflow\ProcessInstance;
+use PHPMentors\Workflower\Workflow\Provider\DataProviderInterface;
 use PHPMentors\Workflower\Workflow\WorkflowRepositoryInterface;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 
@@ -47,6 +48,13 @@ class Process
     private $operationRunner;
 
     /**
+     * @var DataProviderInterface
+     *
+     * @since Property available since Release 1.2.0
+     */
+    private $dataProvider;
+
+    /**
      * @param int|string|WorkflowContextInterface $workflowContext
      * @param WorkflowRepositoryInterface $workflowRepository
      * @param OperationRunnerInterface $operationRunner
@@ -66,6 +74,16 @@ class Process
     public function setExpressionLanguage(ExpressionLanguage $expressionLanguage)
     {
         $this->expressionLanguage = $expressionLanguage;
+    }
+
+    /**
+     * @param DataProviderInterface $dataProvider
+     *
+     * @since Method available since Release 1.2.0
+     */
+    public function setDataProvider(DataProviderInterface $dataProvider)
+    {
+        $this->dataProvider = $dataProvider;
     }
 
     /**
@@ -96,7 +114,7 @@ class Process
         $processInstance = $this->configureWorkflow($workItemContext->getProcessContext()->getProcessInstance());
         /* @var $flowObject ActivityInterface */
         $flowObject = $processInstance->getFlowObject($workItemContext->getActivityId());
-        $workItem = $flowObject->getWorkItems()->getAt(0);
+        $workItem = current($flowObject->getWorkItems()->getActiveInstances());
         $processInstance->allocateWorkItem($workItem, $workItemContext->getParticipant());
     }
 
@@ -112,7 +130,7 @@ class Process
         $processInstance = $this->configureWorkflow($workItemContext->getProcessContext()->getProcessInstance());
         /* @var $flowObject ActivityInterface */
         $flowObject = $processInstance->getFlowObject($workItemContext->getActivityId());
-        $workItem = $flowObject->getWorkItems()->getAt(0);
+        $workItem = current($flowObject->getWorkItems()->getActiveInstances());
         $processInstance->startWorkItem($workItem, $workItemContext->getParticipant());
     }
 
@@ -129,7 +147,7 @@ class Process
         $processInstance->setProcessData($workItemContext->getProcessContext()->getProcessData());
         /* @var $flowObject ActivityInterface */
         $flowObject = $processInstance->getFlowObject($workItemContext->getActivityId());
-        $workItem = $flowObject->getWorkItems()->getAt(0);
+        $workItem = current($flowObject->getWorkItems()->getActiveInstances());
         $processInstance->completeWorkItem($workItem, $workItemContext->getParticipant());
     }
 
@@ -209,6 +227,10 @@ class Process
 
         if ($this->operationRunner !== null) {
             $processInstance->setOperationRunner($this->operationRunner);
+        }
+
+        if( $this->dataProvider !== null){
+            $processInstance->setDataProvider($this->dataProvider);
         }
 
         return $processInstance;

@@ -101,7 +101,6 @@ abstract class AbstractTask extends FlowObject implements ActivityInterface, \Se
      */
     public function unserialize($serialized)
     {
-//        dd($serialized);
         foreach (unserialize($serialized) as $name => $value) {
             if ($name == get_parent_class($this)) {
                 parent::unserialize($value);
@@ -136,7 +135,9 @@ abstract class AbstractTask extends FlowObject implements ActivityInterface, \Se
     public function setProcessInstance(ProcessInstance $processInstance): void
     {
         parent::setProcessInstance($processInstance);
-        $this->setWorkItems($processInstance->generateWorkItemsCollection($this));
+        if ($this->workItems == null) {
+            $this->setWorkItems($processInstance->generateWorkItemsCollection($this));
+        }
     }
 
     /**

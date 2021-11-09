@@ -88,7 +88,8 @@ class ConnectingObjectCollection implements \Countable, \IteratorAggregate, \Ser
     {
         $collection = new static();
 
-        foreach ($this as $connectingObject) { /* @var $connectingObject ConnectingObjectInterface */
+        foreach ($this as $connectingObject) {
+            /* @var $connectingObject ConnectingObjectInterface */
             if ($connectingObject->getSource()->getId() === $flowObject->getId()) {
                 $collection->add($connectingObject);
             }

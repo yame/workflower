@@ -12,7 +12,7 @@
 
 namespace PHPMentors\Workflower\Workflow\Element;
 
-class Token 
+class Token
 {
     /**
      * @var string
@@ -62,6 +62,11 @@ class Token
     public function getPreviousFlowObject(): ?FlowObjectInterface
     {
         return $this->previousFlowObject;
+    }
+
+    public function setPreviousFlowObject(FlowObjectInterface $previousFlowObject)
+    {
+        $this->previousFlowObject = $previousFlowObject;
     }
 
     /**

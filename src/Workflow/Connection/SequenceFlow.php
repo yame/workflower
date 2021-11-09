@@ -105,12 +105,22 @@ class SequenceFlow implements ConnectingObjectInterface, \Serializable
         return $this->source;
     }
 
+    public function setSource($source)
+    {
+        $this->source = $source;
+    }
+
     /**
      * {@inheritdoc}
      */
     public function getDestination()
     {
         return $this->destination;
+    }
+
+    public function setDestination($destination)
+    {
+        $this->destination = $destination;
     }
 
     /**

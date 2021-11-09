@@ -215,21 +215,22 @@ class ProcessInstance implements ProcessInstanceInterface, \Serializable
      */
     protected function setFields()
     {
-        //设置角色
+        //设置Role
         $roleCollection = new RoleCollection();
         foreach ($this->roleCollection as $role) {
             $roleCollection->add(new Role($role));
         }
         $this->roleCollection = $roleCollection;
 
+        //设置
         $workItems = [];
         foreach ($this->flowObjectCollection as $item) {
-            if (method_exists($item, 'getWorkItems')) {
+            if ($item instanceof ActivityInterface) {
                 foreach ($item->getWorkItems() as $workItem) {
-                    $workItem->setProcessInstance($this);
+//                    $workItem->setProcessInstance($this);
                     $workItem->setActivity($item);
 
-                    $workItems[] = $workItem;
+                    $workItems[$workItem->getId()] = $workItem;
                 }
             }
 
@@ -239,6 +240,29 @@ class ProcessInstance implements ProcessInstanceInterface, \Serializable
 
             $item->setProcessInstance($this);
         }
+
+        //Tokens
+        $this->tokens = collect($this->tokens)->map(function ($item){
+            $token = new Token($item['id'],$this->getFlowObject($item['currentFlowObject']));
+            $token->setPreviousFlowObject($this->getFlowObject($item['previousFlowObject']));
+            return $token;
+        })->toArray();
+
+        //Sequence flow
+        foreach ($this->connectingObjectCollection as $sequenceFlow) {
+            $sequenceFlow->setSource($this->getFlowObject($sequenceFlow->getSource()));
+            $sequenceFlow->setDestination($this->getFlowObject($sequenceFlow->getDestination()));
+        }
+
+        //ActivityLog
+        $activityLog = new ActivityLogCollection();
+        foreach ($this->activityLogCollection as $item) {
+            $activityLog->add(new ActivityLog($workItems[$item['workItem']]));
+        }
+        $this->activityLogCollection = $activityLog;
+
+        //Start Event
+        $this->startEvent = $this->getFlowObject($this->startEvent);
     }
 
     /**

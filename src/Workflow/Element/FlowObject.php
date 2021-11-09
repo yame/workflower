@@ -34,7 +34,7 @@ abstract class FlowObject implements FlowObjectInterface, TransitionalInterface,
             }
         }
     }
-    
+
     /**
      * {@inheritdoc}
      */
