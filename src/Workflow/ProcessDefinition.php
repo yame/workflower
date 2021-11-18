@@ -268,6 +268,10 @@ class ProcessDefinition implements ProcessDefinitionInterface
         return $this->name;
     }
 
+    public function getStartEvents()
+    {
+        return $this->startEvents;
+    }
     /**
      * {@inheritdoc}
      */

@@ -294,6 +294,12 @@ class Bpmn2Reader
             $defaultSequenceFlowId = $element->hasAttribute('default') ? $element->getAttribute('default') : null;
             $name = $element->hasAttribute('name') ? $element->getAttribute('name') : null;
 
+            $condition = null;
+            foreach ($element->getElementsByTagNameNs('http://www.omg.org/spec/BPMN/20100524/MODEL', 'condition') as $childElement) {
+                $condition = $childElement->nodeValue;
+                break;
+            }
+
             $config = [
                 'id' => $id,
                 'roleId' => $this->provideRoleIdForFlowObject($process['objectRoles'], $id),
@@ -301,6 +307,9 @@ class Bpmn2Reader
 
             if ($name !== null) {
                 $config['name'] = $name;
+            }
+            if ($condition !== null) {
+                $config['condition'] = $condition;
             }
             if ($defaultSequenceFlowId !== null) {
                 $config['defaultSequenceFlowId'] = $defaultSequenceFlowId;
