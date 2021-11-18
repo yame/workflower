@@ -88,14 +88,20 @@ class Process
 
     /**
      * @param EventContextInterface $eventContext
+     * @param ProcessInstance $processInstance
      */
-    public function start(EventContextInterface $eventContext)
+    public function start(EventContextInterface $eventContext, ProcessInstance $processInstance = null)
     {
         assert($eventContext->getProcessContext() !== null);
         assert($eventContext->getProcessContext()->getProcessInstance() === null);
         assert($eventContext->getEventId() !== null);
 
-        $processInstance = $this->configureWorkflow($this->createWorkflow());
+        if ($processInstance) {
+            $processInstance = $this->configureWorkflow($processInstance);
+        } else {
+            $processInstance = $this->configureWorkflow($this->createWorkflow());
+        }
+
         $eventContext->getProcessContext()->setProcessInstance($processInstance);
         $processInstance->setProcessData($eventContext->getProcessContext()->getProcessData());
         $flowObject = $processInstance->getFlowObject($eventContext->getEventId());
